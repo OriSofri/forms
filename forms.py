@@ -1,9 +1,31 @@
 from flask import Flask, render_template, url_for, redirect
+from flask_sqlalchemy import SQLAlchemy
 from formStructs import RegistrationForm,LoginForm 
 app = Flask(__name__)
 
 app.config['SECRET_KEY']='7bcdf801ed94d527b1771a596b5c93b8'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+db = SQLAlchemy(app)
 
+#creating the DataBase structure
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String, unique=True, nullable=False )
+    email = db.Column(db.String, unique=True, nullable=False )
+    password = db.Column(db.String, unique=True, nullable=False )
+    posts= db.relationship('Pots', backref='author', lazy=True)
+
+    def __repr__(self):
+        return f"User('{self.username}', '{self.email}')"
+
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title  = db.Column(db.String, nullable=False )
+    content = db.Column(db.Text, nullable=False )
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    def __repr__(self):
+        return f"Post('{self.title}')"
 
 @app.route('/')
 @app.route('/Home')
